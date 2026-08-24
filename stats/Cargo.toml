@@ -1,8 +1,8 @@
 [package]
-name = "confab-stats"
+name = "blacksmith-demo-stats"
 version = "0.1.0"
 edition = "2021"
-description = "Vote statistics service for the Confab workshop app"
+description = "Vote statistics service for the Blacksmith-Demo workshop app"
 
 [dependencies]
 axum = "0.8"

@@ -1,4 +1,4 @@
-# Confab — the CI Speedrun workshop
+# Blacksmith-Demo — the CI Speedrun workshop
 
 A small conference schedule & live-voting app with a deliberately honest CI
 pipeline. It exists so you can *feel* slow CI, then fix it yourself:
@@ -31,7 +31,7 @@ how most teams build multi-arch images today.
 cd api && go run .
 
 # Web (proxies /api to :3000)
-pnpm install && pnpm --filter @confab/web dev
+pnpm install && pnpm --filter @blacksmith-demo/web dev
 
 # Stats service
 cd stats && cargo run
@@ -40,7 +40,7 @@ cd stats && cargo run
 cd api && go test ./...
 cd stats && cargo test
 pnpm test          # web unit tests
-pnpm e2e           # Playwright (needs: pnpm --filter @confab/e2e exec playwright install chromium)
+pnpm e2e           # Playwright (needs: pnpm --filter @blacksmith-demo/e2e exec playwright install chromium)
 ```
 
 ## The migration steps

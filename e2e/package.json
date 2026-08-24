@@ -1,5 +1,5 @@
 {
-  "name": "@confab/e2e",
+  "name": "@blacksmith-demo/e2e",
   "private": true,
   "version": "0.1.0",
   "type": "module",

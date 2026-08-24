@@ -1,4 +1,4 @@
-// Confab API: serves the conference schedule and collects talk votes.
+// Blacksmith-Demo API: serves the conference schedule and collects talk votes.
 package main
 
 import (
@@ -21,7 +21,7 @@ func main() {
 	if p := os.Getenv("PORT"); p != "" {
 		addr = ":" + p
 	}
-	log.Printf("confab-api listening on %s", addr)
+	log.Printf("blacksmith-demo-api listening on %s", addr)
 	if err := r.Run(addr); err != nil {
 		log.Fatal(err)
 	}

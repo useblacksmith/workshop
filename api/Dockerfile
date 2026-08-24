@@ -8,9 +8,9 @@ RUN go mod download
 COPY api/ ./
 # -a forces a full rebuild of all packages so the compile cost is honest
 # and consistent across runs (no host toolchain cache).
-RUN CGO_ENABLED=0 go build -a -o /confab-api .
+RUN CGO_ENABLED=0 go build -a -o /blacksmith-demo-api .
 
 FROM gcr.io/distroless/static-debian12
-COPY --from=builder /confab-api /confab-api
+COPY --from=builder /blacksmith-demo-api /blacksmith-demo-api
 EXPOSE 3000
-ENTRYPOINT ["/confab-api"]
+ENTRYPOINT ["/blacksmith-demo-api"]

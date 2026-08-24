@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
 
 test("shows the schedule", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/Confab/);
+  await expect(page).toHaveTitle(/Blacksmith-Demo/);
   await expect(page.getByText("The Feedback Loop Is the Product")).toBeVisible();
   await expect(page.getByText("Sofia Lindqvist — Track 2")).toBeVisible();
   await expect(page.getByTestId("total-votes")).toHaveText("11");

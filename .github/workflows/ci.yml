@@ -1,4 +1,4 @@
-# Confab CI — the "before" state, on GitHub-hosted runners with stock actions.
+# Blacksmith-Demo CI — the "before" state, on GitHub-hosted runners with stock actions.
 # This is the workflow you will migrate to Blacksmith during the workshop.
 # Follow MIGRATION.md.
 name: CI
@@ -26,10 +26,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Unit tests
-        run: pnpm --filter @confab/web test
+        run: pnpm --filter @blacksmith-demo/web test
 
       - name: Build
-        run: pnpm --filter @confab/web build
+        run: pnpm --filter @blacksmith-demo/web build
 
       - name: Report duration
         if: always()
@@ -58,8 +58,8 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_PASSWORD: confab
-          POSTGRES_DB: confab
+          POSTGRES_PASSWORD: demo
+          POSTGRES_DB: demo
         ports:
           - 5432:5432
         options: >-
@@ -80,7 +80,7 @@ jobs:
       - name: Tests (unit + Postgres integration)
         working-directory: api
         env:
-          DATABASE_URL: postgres://postgres:confab@localhost:5432/confab
+          DATABASE_URL: postgres://postgres:demo@localhost:5432/demo
         run: go test -v ./...
 
       - name: Report duration
@@ -104,13 +104,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install browsers
-        run: pnpm --filter @confab/e2e exec playwright install --with-deps
+        run: pnpm --filter @blacksmith-demo/e2e exec playwright install --with-deps
 
       - name: Build web app
-        run: pnpm --filter @confab/web build
+        run: pnpm --filter @blacksmith-demo/web build
 
       - name: Run e2e tests
-        run: pnpm --filter @confab/e2e test
+        run: pnpm --filter @blacksmith-demo/e2e test
 
       - name: Report duration
         if: always()
@@ -135,7 +135,7 @@ jobs:
           file: api/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: false
-          tags: confab-api:ci
+          tags: blacksmith-demo-api:ci
 
       - name: Report duration
         if: always()

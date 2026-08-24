@@ -1,4 +1,4 @@
-//! Confab stats: pulls the schedule from the API and serves vote analytics.
+//! Blacksmith-Demo stats: pulls the schedule from the API and serves vote analytics.
 
 use axum::{extract::State, routing::get, Json, Router};
 use chrono::Utc;
@@ -89,7 +89,7 @@ async fn health_handler() -> Json<serde_json::Value> {
 #[tokio::main]
 async fn main() {
     let api_url =
-        std::env::var("CONFAB_API_URL").unwrap_or_else(|_| "http://localhost:3000".into());
+        std::env::var("DEMO_API_URL").unwrap_or_else(|_| "http://localhost:3000".into());
     let state = Arc::new(AppState { api_url });
 
     let app = Router::new()
@@ -98,7 +98,7 @@ async fn main() {
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
-    println!("confab-stats listening on :3001");
+    println!("blacksmith-demo-stats listening on :3001");
     axum::serve(listener, app).await.unwrap();
 }
 

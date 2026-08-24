@@ -21,7 +21,7 @@ export function App() {
 
   return (
     <main style={{ fontFamily: "system-ui, sans-serif", maxWidth: 640, margin: "2rem auto", padding: "0 1rem" }}>
-      <h1>Confab</h1>
+      <h1>Blacksmith-Demo</h1>
       <p>
         Vote for the talks you want to see. Total votes:{" "}
         <strong data-testid="total-votes">{totalVotes(talks)}</strong>

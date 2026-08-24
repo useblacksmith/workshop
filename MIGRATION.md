@@ -26,7 +26,7 @@ give yourself a disposable one:
 ## Step 1 — Get your copy of this repo (~1 min)
 
 1. On this repo's page, click **Use this template → Create a new repository**.
-2. **Owner:** your new lab org. **Name:** `confab`. **Visibility:** Public
+2. **Owner:** your new lab org. **Name:** `blacksmith-demo`. **Visibility:** Public
    (public repos get unlimited free GitHub Actions minutes).
 3. Create the repository.
 
@@ -114,7 +114,7 @@ cache on NVMe between runs.
       - name: Set up Docker builder
         uses: useblacksmith/setup-docker-builder@v2
         with:
-          cache-key: confab-api-${{ matrix.platform }}
+          cache-key: blacksmith-demo-api-${{ matrix.platform }}
 
       - name: Build image (native ${{ matrix.platform }})
         uses: useblacksmith/build-push-action@v2
@@ -123,7 +123,7 @@ cache on NVMe between runs.
           file: api/Dockerfile
           platforms: linux/${{ matrix.platform }}
           push: false
-          tags: confab-api:ci-${{ matrix.platform }}
+          tags: blacksmith-demo-api:ci-${{ matrix.platform }}
 
       - name: Report duration
         if: always()
