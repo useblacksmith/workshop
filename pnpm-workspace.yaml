@@ -1,0 +1,7 @@
+packages:
+  - web
+  - e2e
+
+# pnpm 11 blocks lifecycle scripts unless approved
+allowBuilds:
+  esbuild: true

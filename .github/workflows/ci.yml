@@ -1,0 +1,163 @@
+# Confab CI — the "before" state, on GitHub-hosted runners with stock actions.
+# This is the workflow you will migrate to Blacksmith during the workshop.
+# Follow MIGRATION.md.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: web (pnpm + Vite + vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm --filter @confab/web test
+
+      - name: Build
+        run: pnpm --filter @confab/web build
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **web** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
+
+  rust:
+    name: rust (cargo build + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            stats/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('stats/Cargo.lock') }}
+
+      - name: Build and test
+        working-directory: stats
+        run: cargo test --locked
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **rust** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
+
+  integration:
+    name: integration (Go + Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: confab
+          POSTGRES_DB: confab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
+
+      - name: Tests (unit + Postgres integration)
+        working-directory: api
+        env:
+          DATABASE_URL: postgres://postgres:confab@localhost:5432/confab
+        run: go test -v ./...
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **integration** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
+
+  e2e:
+    name: e2e (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Chromium
+        run: pnpm --filter @confab/e2e exec playwright install --with-deps chromium
+
+      - name: Build web app
+        run: pnpm --filter @confab/web build
+
+      - name: Run e2e tests
+        run: pnpm --filter @confab/e2e test
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **e2e** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
+
+  docker:
+    name: docker (multi-platform image)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      # On GitHub-hosted runners the arm64 leg runs under QEMU emulation.
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build image (amd64 + arm64)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: api/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: confab-api:ci
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **docker** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"

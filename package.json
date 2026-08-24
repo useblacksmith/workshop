@@ -1,0 +1,9 @@
+{
+  "name": "confab-workshop",
+  "private": true,
+  "scripts": {
+    "test": "pnpm --filter @confab/web test",
+    "build": "pnpm --filter @confab/web build",
+    "e2e": "pnpm --filter @confab/e2e test"
+  }
+}
