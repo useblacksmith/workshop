@@ -1,7 +1,7 @@
 # Build from the repo root: docker build -f api/Dockerfile .
 # The Go compile in the builder stage is the workload that hurts under QEMU
 # emulation on the arm64 leg of a multi-platform build.
-FROM golang:1.24 AS builder
+FROM golang:1.25 AS builder
 WORKDIR /src
 COPY api/go.mod api/go.sum ./
 RUN go mod download
