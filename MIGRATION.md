@@ -1,7 +1,9 @@
 # The CI Speedrun — migration guide
 
 You're going to take this repo's CI from **~9 minutes to ~1 minute**, in your
-browser, in about 20 minutes of hands-on work. No local setup needed.
+browser, in about 20 minutes of hands-on work — first by migrating the
+hardware yourself, then by letting an agent clean up the workflow config.
+No local setup needed.
 
 Everything happens in a **throwaway GitHub org** that you create now and can
 delete afterwards ([cleanup](#appendix-a--cleanup)). Nothing touches your
@@ -69,22 +71,15 @@ Don't commit yet — two more edits.
 
 ## Step 5 — Edit 2: put the cargo build on a sticky disk
 
-In the `rust` job, the `stats/target` directory (the expensive part of a Rust
-build) moves from a tarball-style cache to a **sticky disk** — a persistent
-NVMe volume that mounts into the runner in seconds.
+Notice the `rust` job has **no caching at all** — it recompiles the entire
+dependency tree every run. (Check your own repos before you judge.) The
+expensive part of a Rust build is the `target/` directory, and the best home
+for it is a **sticky disk** — a persistent NVMe volume that mounts into the
+runner in seconds.
 
-**Remove** the `stats/target` line from the cache step, and **add** the
-sticky disk step, so the job reads:
+**Add** this step to the `rust` job, right before "Build and test":
 
 ```yaml
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ hashFiles('stats/Cargo.lock') }}
-
       - name: Mount sticky disk for build artifacts
         uses: useblacksmith/stickydisk@v1
         with:
@@ -150,12 +145,39 @@ run (~3 min). While it builds, find your runs appearing in the
 ## Step 8 — Run again → warm run
 
 **Actions** → **CI** → **Run workflow** once more. Now the Docker layer
-cache, the sticky disk, and the colocated caches are all primed: **~1 minute
-wall clock.**
+cache and the sticky disk are primed: **~2 minutes wall clock.**
 
-Open the run summary — each job printed its duration. Compare your three
-runs, and post your warm-run wall-clock time to the leaderboard (QR on
-screen). Fastest speedrun wins.
+Fast — but look closer at the logs. `pnpm install` still downloads every
+package. Playwright still installs three browsers (the tests use one). The
+cargo registry still re-fetches. The hardware is fixed; the *workflow config*
+is still the one your team wrote in a hurry two years ago. That's the next
+step.
+
+## Step 9 — Let the agent finish the job
+
+You've been fixing this workflow by hand. Now watch the other half of the
+story: comment on any PR or issue in your repo —
+
+```
+@codesmith this workflow wastes time on every run — find the config
+problems and open a PR fixing them.
+```
+
+Codesmith reads your run history and step timings, then opens a PR doing
+what a careful engineer would: dependency caches with lockfile keys,
+Chromium-only browser install, cancel-superseded-runs concurrency. Review
+the diff, merge, **Run workflow** one last time: **~1 minute.**
+
+> No agent budget, or want to see the answer? `git checkout step-4-optimized`
+> is the same PR, pre-baked.
+
+Four runs on your screen: **~9:00 → ~3:00 → ~2:00 → ~1:00.** The first jump
+was hardware. The last one was an agent doing CI hygiene — the same kind of
+agent that's about to multiply your CI load is also the thing that keeps it
+tuned.
+
+Post your best wall-clock time to the leaderboard (QR on screen). Fastest
+speedrun wins.
 
 ---
 
