@@ -1,12 +1,16 @@
-# Blacksmith-Demo CI — workshop step 2 complete: cargo target on a sticky
-# disk, Docker layers on Blacksmith's persistent builder cache.
-# Next: step 3 (@codesmith configures the rest), step 4 (rightsize).
+# Blacksmith-Demo CI — workshop step 3 complete. This branch mirrors the PR
+# @codesmith opens: lockfile-keyed caches, Chromium-only browser install,
+# cancellation of superseded runs. Step 4 (rightsize) happens in the dashboard.
 name: CI
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   web:
@@ -21,6 +25,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -42,6 +47,14 @@ jobs:
       - uses: actions/checkout@v7
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('stats/Cargo.lock') }}
 
       - name: Mount sticky disk for build artifacts
         uses: useblacksmith/stickydisk@v1
@@ -105,12 +118,19 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install browsers
-        run: pnpm --filter @blacksmith-demo/e2e exec playwright install --with-deps
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Chromium
+        run: pnpm --filter @blacksmith-demo/e2e exec playwright install --with-deps chromium
 
       - name: Build web app
         run: pnpm --filter @blacksmith-demo/web build
