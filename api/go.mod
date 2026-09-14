@@ -1,4 +1,4 @@
-module github.com/useblacksmith/developers-workshop/api
+module github.com/useblacksmith/workshop/api
 
 go 1.25.0
 
