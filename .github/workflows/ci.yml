@@ -1,6 +1,6 @@
-# Blacksmith-Demo CI — the "before" state, on GitHub-hosted runners with stock actions.
-# This is the workflow you will migrate to Blacksmith during the workshop.
-# Follow MIGRATION.md.
+# Blacksmith-Demo CI — workshop step 1 complete: all jobs run on Blacksmith
+# runners; existing caches are colocated automatically.
+# Next: step 2 (sticky disks), step 3 (@codesmith), step 4 (rightsize).
 name: CI
 
 on:
@@ -11,7 +11,7 @@ on:
 jobs:
   web:
     name: web (pnpm + Vite + vitest)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v7
       - name: Start timer
@@ -37,7 +37,7 @@ jobs:
 
   rust:
     name: rust (cargo build + test)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v7
       - name: Start timer
@@ -53,7 +53,7 @@ jobs:
 
   integration:
     name: integration (Go + Postgres)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     services:
       postgres:
         image: postgres:17-alpine
@@ -89,7 +89,7 @@ jobs:
 
   e2e:
     name: e2e (Playwright)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v7
       - name: Start timer
@@ -118,7 +118,7 @@ jobs:
 
   docker:
     name: docker (multi-platform image)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v7
       - name: Start timer
