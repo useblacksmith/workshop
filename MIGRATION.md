@@ -1,215 +1,172 @@
-# The CI Speedrun — migration guide
+# The CI Speedrun — workshop guide
 
-You're going to take this repo's CI from **~9 minutes to ~1 minute**, in your
-browser, in about 20 minutes of hands-on work — first by migrating the
-hardware yourself, then by letting an agent clean up the workflow config.
-No local setup needed.
+Four steps, all in your browser, no local setup: migrate CI to
+[Blacksmith](https://blacksmith.sh), put the expensive parts on persistent
+disks, then let an agent finish the tuning and right-size your runners.
 
-Everything happens in a **throwaway GitHub org** that you create now and can
-delete afterwards ([cleanup](#appendix-a--cleanup)). Nothing touches your
-company's GitHub org, and no credit card is needed anywhere.
+You'll do this either on **your own repo** (best — you leave with real CI
+migrated) or on **our demo repo** (guaranteed to work for everyone).
 
 ---
 
-## Step 0 — Create your lab org (~2 min)
+## Step 0 — Setup (~10 min, do this first)
 
-Blacksmith installs on GitHub **organizations**, not personal accounts, so
-give yourself a disposable one:
+1. Get on the wifi, sign in at [github.com](https://github.com).
+2. Sign in at [app.blacksmith.sh](https://app.blacksmith.sh) with GitHub.
+   Don't install anything yet.
+3. **Choose your repo:**
 
-1. Sign in at [github.com](https://github.com) (create an account if needed).
-2. Click your avatar (top right) → **Settings** → **Organizations** → **New organization**
-   — or go straight to <https://github.com/organizations/plan>.
-3. Pick the **Free** plan.
-4. Name it something like `<your-handle>-ci-lab`.
-5. Skip inviting members — just you.
+**Option A — your own repo** (pick this if you can):
+- You need a GitHub **organization you can install apps on** (org admin, or
+  an admin who'll approve fast) — personal side-project orgs count.
+- And a repo in it with real CI that you're **allowed to experiment on**.
 
-## Step 1 — Get your copy of this repo (~1 min)
+**Option B — our demo repo** (pick this otherwise):
+1. Create a throwaway org: github.com → avatar → Settings → Organizations →
+   **New organization** → Free plan. Name it `<your-handle>-ci-lab`. Skip
+   inviting members. (Blacksmith installs on orgs, not personal accounts.
+   [Appendix A](#appendix-a--cleanup) deletes all of this in one minute.)
+2. On this repo: **Use this template → Create a new repository.**
+   Owner: your new org. Visibility: **Public** (free unlimited Actions
+   minutes). It's a small real app — Go API + Postgres, Rust service,
+   TypeScript frontend, Playwright — with deliberately typical CI.
 
-1. On this repo's page, click **Use this template → Create a new repository**.
-2. **Owner:** your new lab org. **Name:** `blacksmith-demo`. **Visibility:** Public
-   (public repos get unlimited free GitHub Actions minutes).
-3. Create the repository.
+**Both options:** run the workflow once now on GitHub's runners
+(**Actions → CI → Run workflow**) and note the **per-job durations** — job
+times, not the run's wall clock, are your before-numbers for the scoreboard.
 
-## Step 2 — Run the baseline (~1 min to start, ~9 min to finish)
+## Step 1 — Migrate the runners
 
-1. In *your* repo: **Actions** tab → **CI** → **Run workflow** → run on `main`.
-2. Watch five jobs fan out onto GitHub-hosted runners.
-3. Note the long pole: the `docker` job, building an arm64 image under QEMU
-   emulation.
+1. Install the Blacksmith GitHub App from [app.blacksmith.sh](https://app.blacksmith.sh),
+   **scoped to just your chosen repo** — the app only sees what you select.
+2. Swap the runner labels:
+   - **Your repo:** use the **migration wizard** in the Blacksmith dashboard —
+     it opens the PR for you. Or hand-edit: every `runs-on: ubuntu-latest`
+     becomes `runs-on: blacksmith-2vcpu-ubuntu-2404` (always the explicit
+     label; per-job sizing like `4vcpu` is a feature, not a typo).
+   - **Demo repo:** hand-edit `.github/workflows/ci.yml` in the GitHub web
+     editor (press `.`) — five `runs-on` lines; give `rust` the
+     `blacksmith-4vcpu-ubuntu-2404` label.
+3. Merge/commit and run the workflow again.
 
-☕ This takes ~9 minutes. That's the point. Back to the presentation.
+Free bonus you didn't configure: every existing `actions/cache` /
+`setup-node` cache is now served from a cache **colocated** with the runner —
+same code, ~4x faster transfers.
 
-## Step 3 — Sign up for Blacksmith (~3 min)
+> Demo repo, fell behind? `step-1-runners` has this done.
 
-1. Go to [app.blacksmith.sh](https://app.blacksmith.sh) → **Sign in with GitHub**.
-2. Install the Blacksmith GitHub App when prompted:
-   - **Select your lab org** (not your company org — the app only sees what
-     you scope it to).
-3. That's it. There are no agents to deploy and no config files — any job
-   whose `runs-on` label starts with `blacksmith-` now runs on Blacksmith.
+## Step 2 — Sticky disks
 
-You're on the free tier: 3,000 minutes/month, no credit card.
-
-## Step 4 — Edit 1: swap the runner labels
-
-Open `.github/workflows/ci.yml` in your repo (press `.` or use the ✏️ pencil
-icon) and change every `runs-on` line:
-
-| Job | Before | After |
-|---|---|---|
-| `web`, `integration`, `e2e`, `docker` | `runs-on: ubuntu-latest` | `runs-on: blacksmith-2vcpu-ubuntu-2404` |
-| `rust` | `runs-on: ubuntu-latest` | `runs-on: blacksmith-4vcpu-ubuntu-2404` |
-
-That's the whole migration for three of the five jobs. Bonus you didn't have
-to configure: every `actions/cache` and `setup-node` cache in this file is
-now served from Blacksmith's colocated cache — same code, ~4x faster
-transfers.
-
-Don't commit yet — two more edits.
-
-> Lost? `git checkout step-1-runners` has this step done.
-
-## Step 5 — Edit 2: put the cargo build on a sticky disk
-
-Notice the `rust` job has **no caching at all** — it recompiles the entire
-dependency tree every run. (Check your own repos before you judge.) The
-expensive part of a Rust build is the `target/` directory, and the best home
-for it is a **sticky disk** — a persistent NVMe volume that mounts into the
-runner in seconds.
-
-**Add** this step to the `rust` job, right before "Build and test":
+A **sticky disk** is a persistent NVMe volume that mounts into your runner in
+seconds, with everything exactly as the last run left it. Give one to your
+most expensive directory:
 
 ```yaml
-      - name: Mount sticky disk for build artifacts
+      - name: Mount sticky disk
         uses: useblacksmith/stickydisk@v1
         with:
-          key: ${{ github.repository }}-cargo-target
-          path: ./stats/target
+          key: ${{ github.repository }}-build-cache
+          path: ./<expensive-directory>
 ```
 
-> Lost? `git checkout step-2-stickydisk`.
+**Recipe sheet — what to mount:**
 
-## Step 6 — Edit 3: kill QEMU — build arm64 on real arm64
+| Ecosystem | Path to persist |
+|---|---|
+| Rust | `target/` |
+| Turborepo / Nx | `.turbo/` / `.nx/cache` |
+| Gradle | `~/.gradle/caches` |
+| Go | `~/.cache/go-build` |
+| Cypress / Playwright browsers | `~/.cache/Cypress` / `~/.cache/ms-playwright` |
+| Docker layers | don't mount — swap to `useblacksmith/setup-docker-builder@v2` (with a `cache-key`) + `useblacksmith/build-push-action@v2`; the layer cache persists automatically |
 
-Replace the entire `docker` job with this: each platform builds on **native
-hardware** via a matrix, and Blacksmith's Docker builder keeps your layer
-cache on NVMe between runs.
+**Demo repo:** mount `./stats/target` in the `rust` job, and make the Docker
+builder swap shown above in the `docker` job.
 
-```yaml
-  docker:
-    name: docker (${{ matrix.platform }})
-    strategy:
-      matrix:
-        include:
-          - platform: amd64
-            runner: blacksmith-2vcpu-ubuntu-2404
-          - platform: arm64
-            runner: blacksmith-2vcpu-ubuntu-2404-arm
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v7
-      - name: Start timer
-        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+Two expectations to set: the disk pays off on the **second** run, and on orgs
+with **sticky-disk branch protection** enabled, disks commit only from the
+default branch — PR runs read but don't warm, so merge before you measure.
 
-      - name: Set up Docker builder
-        uses: useblacksmith/setup-docker-builder@v2
-        with:
-          cache-key: blacksmith-demo-api-${{ matrix.platform }}
+> Demo repo checkpoint: `step-2-stickydisk`.
 
-      - name: Build image (native ${{ matrix.platform }})
-        uses: useblacksmith/build-push-action@v2
-        with:
-          context: .
-          file: api/Dockerfile
-          platforms: linux/${{ matrix.platform }}
-          push: false
-          tags: blacksmith-demo-api:ci-${{ matrix.platform }}
+## Step 3 — Let Codesmith configure the rest
 
-      - name: Report duration
-        if: always()
-        run: echo "⏱ **docker/${{ matrix.platform }}** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
-```
+First, workshop credits: scan the QR on screen and submit your **GitHub
+username** (make sure the org you installed today is the one selected in
+your Blacksmith dashboard). Credits land on your org within a couple of
+minutes.
 
-Note what's *gone*: `setup-qemu-action`, `setup-buildx-action`, and any
-`cache-from`/`cache-to` you'd normally maintain. Your config got shorter.
-
-> Lost? `git checkout step-3-docker` — the finished state.
-
-## Step 7 — Commit → cold run
-
-Commit the edits to `main`. The push triggers your first Blacksmith run:
-**everything is faster, but every cache is empty.** This is your worst-case
-run (~3 min). While it builds, find your runs appearing in the
-[Blacksmith dashboard](https://app.blacksmith.sh).
-
-## Step 8 — Run again → warm run
-
-**Actions** → **CI** → **Run workflow** once more. Now the Docker layer
-cache and the sticky disk are primed: **~2 minutes wall clock.**
-
-Fast — but look closer at the logs. `pnpm install` still downloads every
-package. Playwright still installs three browsers (the tests use one). The
-cargo registry still re-fetches. The hardware is fixed; the *workflow config*
-is still the one your team wrote in a hurry two years ago. That's the next
-step.
-
-## Step 9 — Let the agent finish the job
-
-You've been fixing this workflow by hand. Now watch the other half of the
-story: comment on any PR or issue in your repo —
+Then comment on any PR or issue in your repo:
 
 ```
-@codesmith this workflow wastes time on every run — find the config
-problems and open a PR fixing them.
+@codesmith find the expensive, uncached parts of this workflow and
+open a PR configuring sticky disks and caching for them.
 ```
 
-Codesmith reads your run history and step timings, then opens a PR doing
-what a careful engineer would: dependency caches with lockfile keys,
-Chromium-only browser install, cancel-superseded-runs concurrency. Review
-the diff, merge, **Run workflow** one last time: **~1 minute.**
+Codesmith reads your run history — step timings, cache misses, oversized
+installs — and opens a PR. Review the diff, compare it with what you mounted
+by hand in Step 2, and merge.
 
-> No agent budget, or want to see the answer? `git checkout step-4-optimized`
-> is the same PR, pre-baked.
+> Demo repo: `step-3-agent-optimized` mirrors the agent's PR if you'd rather
+> not spend credits.
 
-Four runs on your screen: **~9:00 → ~3:00 → ~2:00 → ~1:00.** The first jump
-was hardware. The last one was an agent doing CI hygiene — the same kind of
-agent that's about to multiply your CI load is also the thing that keeps it
-tuned.
+## Step 4 — Right-size your longest workflow
 
-Post your best wall-clock time to the leaderboard (QR on screen). Fastest
-speedrun wins.
+You now have at least two Blacksmith runs of history — enough for
+right-sizing. In the Blacksmith dashboard, run **rightsize** against your
+longest-running workflow: it analyzes per-step CPU and memory headroom and
+recommends a runner size per job (bigger where you're compute-bound, smaller
+where you're paying for idle cores). Review the recommendation card, apply
+the rows you agree with — it edits the YAML and opens the PR — merge, and
+run one last time.
+
+## The scoreboard
+
+Compare **per-job durations** (never wall clock) between your first GitHub
+run and your final run. Post your biggest percentage speedup to the
+leaderboard (QR on screen). Biggest speedup wins.
 
 ---
 
-## Part 2 — Do it for real (homework)
+## Keep going
 
-You already have a Blacksmith account and 3,000 free minutes/month. Pick ONE
-real workflow in your own org this week:
-
-1. Install the Blacksmith app on the org (or ask your admin), scoped to one
-   repo to start.
-2. Swap `runs-on` labels — always the explicit form, e.g.
-   `blacksmith-2vcpu-ubuntu-2404` (or use the migration wizard in the
-   dashboard, which opens the PR for you).
-3. If you build Docker images: `useblacksmith/setup-docker-builder@v2`
-   (+ `cache-key`) and `useblacksmith/build-push-action@v2`, and delete your
-   `cache-from`/`cache-to` lines.
-4. If you have a big compiled artifact dir (cargo target, Bazel cache, Gradle
-   cache): mount a `useblacksmith/stickydisk@v1`.
-5. Keep `actions/cache`/`setup-node`/`setup-go` exactly as they are — they're
-   automatically colocated.
-
-Docs: <https://docs.blacksmith.sh> · Questions: come by the booth.
+- Migrated the demo repo today? Do your real repo this week — you already
+  have the account, the app, and 3,000 free minutes/month, and Step 1 took
+  you ten minutes.
+- Migrated a real repo today? Expand the app's scope to the next repo.
+- Docs: <https://docs.blacksmith.sh> · Questions: find us at the booth.
 
 ## Appendix A — Cleanup
 
-Want to leave no trace? Takes one minute:
+Used a throwaway org and want to leave no trace?
 
-1. **Uninstall Blacksmith:** your lab org → **Settings** → **GitHub Apps** →
-   Blacksmith → **Uninstall**.
-2. **Delete the org:** your lab org → **Settings** → scroll down → **Delete
-   this organization** (this deletes the repo too).
+1. **Uninstall Blacksmith:** org → Settings → GitHub Apps → Blacksmith → Uninstall.
+2. **Delete the org:** org → Settings → Delete this organization (removes the repo too).
 3. Optionally delete your Blacksmith account from the dashboard settings.
 
-(We'd rather you kept it — you have 3,000 free minutes a month — but the
-exit is always this easy.)
+(We'd rather you kept the free minutes — but the exit is always this easy.)
+
+## Appendix B — Multi-arch images without QEMU
+
+If you build `arm64` images on x86 runners today, you're paying the QEMU
+emulation tax (~10x slower than native). Blacksmith has native arm64
+runners — build each platform on its own hardware:
+
+```yaml
+  docker:
+    strategy:
+      matrix:
+        include:
+          - { platform: amd64, runner: blacksmith-2vcpu-ubuntu-2404 }
+          - { platform: arm64, runner: blacksmith-2vcpu-ubuntu-2404-arm }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: my-image-${{ matrix.platform }}
+      - uses: useblacksmith/build-push-action@v2
+        with:
+          platforms: linux/${{ matrix.platform }}
+          ...
+```

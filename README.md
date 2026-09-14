@@ -1,13 +1,10 @@
 # Blacksmith-Demo — the CI Speedrun workshop
 
-A small conference schedule & live-voting app with a deliberately honest CI
-pipeline. It exists so you can *feel* slow CI, then fix it yourself:
-migrate this repo's workflow from GitHub-hosted runners to
-[Blacksmith](https://blacksmith.sh) in three copy-paste edits, then let
-Codesmith fix the config debt, and watch the same pipeline go from
-**~9 minutes → ~3 minutes → ~2 minutes → ~1 minute**.
+A small conference schedule & voting app with deliberately typical CI. It's
+the fallback repo for the hands-on Blacksmith workshop: if you can't migrate
+your own repo, you migrate this one — same four steps, guaranteed to work.
 
-**👉 Doing the workshop? Everything you need is in [MIGRATION.md](MIGRATION.md).**
+**👉 Doing the workshop? Everything is in [MIGRATION.md](MIGRATION.md).**
 
 ## What's inside
 
@@ -17,42 +14,33 @@ Codesmith fix the config debt, and watch the same pipeline go from
 | `stats/` | Rust service (Axum) computing vote analytics | `rust` |
 | `web/` | React + TypeScript frontend (pnpm, Vite, vitest) | `web` |
 | `e2e/` | Playwright browser tests | `e2e` |
-| `api/Dockerfile` | Multi-platform (amd64 + arm64) image build | `docker` |
+| `api/Dockerfile` | Container image build | `docker` |
 
-One workflow, five parallel jobs — a miniature version of a real team's CI.
-On GitHub-hosted runners the arm64 Docker leg runs under QEMU emulation,
-which is why the `docker` job is the long pole. That's not sabotage; it's
-how most teams build multi-arch images today.
+One workflow, five parallel jobs — a miniature of a real team's CI, on
+GitHub-hosted runners with stock actions. It's unoptimized in exactly the
+ways real workflows are (no dependency caches, every browser installed,
+cargo compiling from scratch) — that's not sabotage, it's realism, and
+fixing it is the workshop.
+
+## The four steps
+
+Each hands-on step has a checkpoint branch if you fall behind:
+
+1. [`step-1-runners`](../../tree/step-1-runners) — swap runner labels to Blacksmith
+2. [`step-2-stickydisk`](../../tree/step-2-stickydisk) — cargo build on a sticky disk + persistent Docker layer cache
+3. [`step-3-agent-optimized`](../../tree/step-3-agent-optimized) — the PR `@codesmith` opens: caches, Chromium-only, concurrency
+4. Right-sizing happens in the Blacksmith dashboard — no branch needed
 
 ## Run it locally
 
 ```bash
-# API (in-memory store)
-cd api && go run .
+cd api && go run .                       # API (in-memory store)
+pnpm install && pnpm --filter @blacksmith-demo/web dev   # web, proxies /api
+cd stats && cargo run                    # stats service
 
-# Web (proxies /api to :3000)
-pnpm install && pnpm --filter @blacksmith-demo/web dev
-
-# Stats service
-cd stats && cargo run
-
-# Tests
+# tests
 cd api && go test ./...
 cd stats && cargo test
 pnpm test          # web unit tests
-pnpm e2e           # Playwright (needs: pnpm --filter @blacksmith-demo/e2e exec playwright install chromium)
+pnpm e2e           # Playwright (first: pnpm --filter @blacksmith-demo/e2e exec playwright install chromium)
 ```
-
-## The migration steps
-
-Each step has a matching branch if you fall behind:
-
-1. [`step-1-runners`](../../tree/step-1-runners) — swap runner labels
-2. [`step-2-stickydisk`](../../tree/step-2-stickydisk) — put the cargo build on a sticky disk
-3. [`step-3-docker`](../../tree/step-3-docker) — native arm64 builds, no more QEMU
-4. [`step-4-optimized`](../../tree/step-4-optimized) — what `@codesmith` fixes: the caches,
-   browser bloat, and concurrency this workflow "forgot" (like most real ones do)
-
-See [MIGRATION.md](MIGRATION.md) for the full guide, including creating a
-throwaway GitHub org so nothing touches your company's setup — and how to
-clean everything up afterwards.
