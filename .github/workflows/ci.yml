@@ -1,6 +1,6 @@
-# Blacksmith-Demo CI — workshop step 1 complete: all jobs run on Blacksmith
-# runners; existing caches are colocated automatically.
-# Next: step 2 (sticky disks), step 3 (@codesmith), step 4 (rightsize).
+# Blacksmith-Demo CI — workshop step 2 complete: cargo target on a sticky
+# disk, Docker layers on Blacksmith's persistent builder cache.
+# Next: step 3 (@codesmith configures the rest), step 4 (rightsize).
 name: CI
 
 on:
@@ -42,6 +42,12 @@ jobs:
       - uses: actions/checkout@v7
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Mount sticky disk for build artifacts
+        uses: useblacksmith/stickydisk@v1
+        with:
+          key: ${{ github.repository }}-cargo-target
+          path: ./stats/target
 
       - name: Build and test
         working-directory: stats
@@ -124,10 +130,14 @@ jobs:
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
 
-      - uses: docker/setup-buildx-action@v4
+      # Blacksmith's builder keeps the Docker layer cache on NVMe between runs.
+      - name: Set up Docker builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: blacksmith-demo-api
 
       - name: Build image
-        uses: docker/build-push-action@v7
+        uses: useblacksmith/build-push-action@v2
         with:
           context: .
           file: api/Dockerfile
