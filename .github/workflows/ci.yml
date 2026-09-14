@@ -124,16 +124,14 @@ jobs:
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
 
-      # On GitHub-hosted runners the arm64 leg runs under QEMU emulation.
-      - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v4
 
-      - name: Build image (amd64 + arm64)
+      - name: Build image
         uses: docker/build-push-action@v7
         with:
           context: .
           file: api/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: false
           tags: blacksmith-demo-api:ci
 

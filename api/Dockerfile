@@ -1,6 +1,6 @@
 # Build from the repo root: docker build -f api/Dockerfile .
-# The Go compile in the builder stage is the workload that hurts under QEMU
-# emulation on the arm64 leg of a multi-platform build.
+# The Go compile in the builder stage is the expensive layer; on Blacksmith
+# it persists in the Docker layer cache between runs.
 FROM golang:1.25 AS builder
 WORKDIR /src
 COPY api/go.mod api/go.sum ./
