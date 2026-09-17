@@ -1,5 +1,6 @@
 {
   "name": "blacksmith-demo",
+  "packageManager": "pnpm@11.24.0",
   "private": true,
   "scripts": {
     "test": "pnpm --filter @blacksmith-demo/web test",
