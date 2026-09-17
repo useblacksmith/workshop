@@ -1,7 +1,7 @@
 # Build from the repo root: docker build -f api/Dockerfile .
 # The Go compile in the builder stage is the expensive layer; on Blacksmith
 # it persists in the Docker layer cache between runs.
-FROM golang:1.25 AS builder
+FROM golang:1.26 AS builder
 WORKDIR /src
 COPY api/go.mod api/go.sum ./
 RUN go mod download
