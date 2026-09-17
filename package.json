@@ -1,5 +1,5 @@
 {
-  "name": "developers-workshop",
+  "name": "blacksmith-demo",
   "private": true,
   "scripts": {
     "test": "pnpm --filter @blacksmith-demo/web test",
