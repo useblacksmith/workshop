@@ -23,7 +23,7 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
 
 **Option B — our demo repo** (pick this otherwise):
 1. Create a throwaway org: github.com → avatar → Settings → Organizations →
-   **New organization** → Free plan. Name it `<your-handle>-ci-lab`. Skip
+   **New organization** → Free plan. Name it `<github username>-blacksmith-workshop`. Skip
    inviting members. (Blacksmith installs on orgs, not personal accounts.
    [Appendix A](#appendix-a--cleanup) deletes all of this in one minute.)
 2. On this repo: **Use this template → Create a new repository.**
