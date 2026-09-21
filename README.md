@@ -24,14 +24,13 @@ fixing it is the workshop.
 
 ## The four steps
 
-Each hands-on step has a checkpoint branch if you fall behind. In a template
-copy these branches share no git history with yours, so they can't be merged:
-open them read-only and copy the file contents over.
+1. Swap runner labels to Blacksmith
+2. Cargo build on a sticky disk + persistent Docker layer cache
+3. The PR `@codesmith` opens: caches, Chromium-only, concurrency
+4. Right-sizing happens in the Blacksmith dashboard
 
-1. [`step-1-runners`](https://github.com/useblacksmith/workshop/tree/step-1-runners): swap runner labels to Blacksmith
-2. [`step-2-stickydisk`](https://github.com/useblacksmith/workshop/tree/step-2-stickydisk): cargo build on a sticky disk + persistent Docker layer cache
-3. [`step-3-agent-optimized`](https://github.com/useblacksmith/workshop/tree/step-3-agent-optimized): the PR `@codesmith` opens: caches, Chromium-only, concurrency
-4. Right-sizing happens in the Blacksmith dashboard; no branch needed
+Fell behind? Appendix C of [MIGRATION.md](MIGRATION.md) has the finished
+workflow to paste in.
 
 ## Run it locally
 
