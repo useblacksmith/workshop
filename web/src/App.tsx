@@ -37,7 +37,7 @@ export function App() {
               <strong>{talk.title}</strong>
               <br />
               <small>
-                {talk.speaker} — {talk.room}
+                {talk.speaker} · {talk.room}
               </small>
             </span>
             <button onClick={() => vote(talk.id)} aria-label={`Vote for ${talk.title}`}>
