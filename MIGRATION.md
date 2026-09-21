@@ -53,7 +53,9 @@ Free bonus you didn't configure: every existing `actions/cache` /
 `setup-node` cache is now served from a cache **colocated** with the runner:
 same code, ~4x faster transfers.
 
-> Demo repo, fell behind? `step-1-runners` has this done.
+> Demo repo, fell behind? Open `ci.yml` on the [`step-1-runners` branch](https://github.com/useblacksmith/workshop/blob/step-1-runners/.github/workflows/ci.yml)
+> and copy its contents over yours in the web editor. (Template copies share
+> no git history with these branches, so they can't be merged as PRs.)
 
 ## Step 2: Sticky disks
 
@@ -89,7 +91,7 @@ default branch; PR runs read but don't warm, so merge before you measure.
 (Branch protection is off by default, so on a fresh org your PR runs fill
 disks just fine.)
 
-> Demo repo checkpoint: `step-2-stickydisk`.
+> Demo repo, fell behind? Copy `ci.yml` from the [`step-2-stickydisk` branch](https://github.com/useblacksmith/workshop/blob/step-2-stickydisk/.github/workflows/ci.yml).
 
 ## Step 3: Let Codesmith configure the rest
 
@@ -108,8 +110,8 @@ Codesmith reads your run history (step timings, cache misses, oversized
 installs) and opens a PR. Review the diff, compare it with what you mounted
 by hand in Step 2, and merge.
 
-> Demo repo: `step-3-agent-optimized` mirrors the agent's PR if you'd rather
-> not spend credits.
+> Demo repo: the [`step-3-agent-optimized` branch](https://github.com/useblacksmith/workshop/blob/step-3-agent-optimized/.github/workflows/ci.yml) mirrors the agent's
+> changes if you'd rather not spend credits; copy its `ci.yml` over yours.
 
 ## Step 4: Right-size your longest workflow
 

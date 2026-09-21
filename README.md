@@ -24,11 +24,13 @@ fixing it is the workshop.
 
 ## The four steps
 
-Each hands-on step has a checkpoint branch if you fall behind:
+Each hands-on step has a checkpoint branch if you fall behind. In a template
+copy these branches share no git history with yours, so they can't be merged:
+open them read-only and copy the file contents over.
 
-1. [`step-1-runners`](../../tree/step-1-runners): swap runner labels to Blacksmith
-2. [`step-2-stickydisk`](../../tree/step-2-stickydisk): cargo build on a sticky disk + persistent Docker layer cache
-3. [`step-3-agent-optimized`](../../tree/step-3-agent-optimized): the PR `@codesmith` opens: caches, Chromium-only, concurrency
+1. [`step-1-runners`](https://github.com/useblacksmith/workshop/tree/step-1-runners): swap runner labels to Blacksmith
+2. [`step-2-stickydisk`](https://github.com/useblacksmith/workshop/tree/step-2-stickydisk): cargo build on a sticky disk + persistent Docker layer cache
+3. [`step-3-agent-optimized`](https://github.com/useblacksmith/workshop/tree/step-3-agent-optimized): the PR `@codesmith` opens: caches, Chromium-only, concurrency
 4. Right-sizing happens in the Blacksmith dashboard; no branch needed
 
 ## Run it locally
