@@ -53,9 +53,7 @@ Free bonus you didn't configure: every existing `actions/cache` /
 `setup-node` cache is now served from a cache **colocated** with the runner:
 same code, ~4x faster transfers.
 
-> Demo repo, fell behind? Open `ci.yml` on the [`step-1-runners` branch](https://github.com/useblacksmith/workshop/blob/step-1-runners/.github/workflows/ci.yml)
-> and copy its contents over yours in the web editor. (Template copies share
-> no git history with these branches, so they can't be merged as PRs.)
+> Fell behind? [Appendix C](#appendix-c-the-finished-workflow) has the finished workflow; paste it in on a new branch and open a PR.
 
 ## Step 2: Sticky disks
 
@@ -91,7 +89,7 @@ default branch; PR runs read but don't warm, so merge before you measure.
 (Branch protection is off by default, so on a fresh org your PR runs fill
 disks just fine.)
 
-> Demo repo, fell behind? Copy `ci.yml` from the [`step-2-stickydisk` branch](https://github.com/useblacksmith/workshop/blob/step-2-stickydisk/.github/workflows/ci.yml).
+> Fell behind? [Appendix C](#appendix-c-the-finished-workflow) has the finished workflow.
 
 ## Step 3: Let Codesmith configure the rest
 
@@ -110,8 +108,14 @@ Codesmith reads your run history (step timings, cache misses, oversized
 installs) and opens a PR. Review the diff, compare it with what you mounted
 by hand in Step 2, and merge.
 
-> Demo repo: the [`step-3-agent-optimized` branch](https://github.com/useblacksmith/workshop/blob/step-3-agent-optimized/.github/workflows/ci.yml) mirrors the agent's
-> changes if you'd rather not spend credits; copy its `ci.yml` over yours.
+Rather not spend credits, or want to check the agent's work? Its PR makes four
+edits, all included in [Appendix C](#appendix-c-the-finished-workflow):
+
+1. A `concurrency` block so superseded runs cancel themselves.
+2. `cache: pnpm` on both `actions/setup-node` steps (lockfile-keyed).
+3. An `actions/cache` step for the cargo registry (`~/.cargo/registry` + `~/.cargo/git`).
+4. Playwright: install **Chromium only** instead of every browser, with the
+   browser directory cached via `actions/cache`.
 
 ## Step 4: Right-size your longest workflow
 
@@ -171,4 +175,183 @@ its own hardware:
         with:
           platforms: linux/${{ matrix.platform }}
           ...
+```
+
+## Appendix C: the finished workflow
+
+The complete `ci.yml` after Steps 1 to 3. Paste it over yours at any point to
+catch up (use a new branch and open a PR so CI runs on it):
+
+```yaml
+# Blacksmith-Demo CI: the finished state after Steps 1 to 3.
+# Paste this whole file over .github/workflows/ci.yml (on a new branch,
+# then open a PR) to catch up at any point. Step 4 happens in the dashboard.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: web (pnpm + Vite + vitest)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm --filter @blacksmith-demo/web test
+
+      - name: Build
+        run: pnpm --filter @blacksmith-demo/web build
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **web** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
+
+  rust:
+    name: rust (cargo build + test)
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('stats/Cargo.lock') }}
+
+      - name: Mount sticky disk for build artifacts
+        uses: useblacksmith/stickydisk@v1
+        with:
+          key: ${{ github.repository }}-cargo-target
+          path: ./stats/target
+
+      - name: Build and test
+        working-directory: stats
+        run: cargo test --locked
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **rust** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
+
+  integration:
+    name: integration (Go + Postgres)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: demo
+          POSTGRES_DB: demo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
+
+      - name: Tests (unit + Postgres integration)
+        working-directory: api
+        env:
+          DATABASE_URL: postgres://postgres:demo@localhost:5432/demo
+        run: go test -v ./...
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **integration** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
+
+  e2e:
+    name: e2e (Playwright)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Chromium
+        run: pnpm --filter @blacksmith-demo/e2e exec playwright install --with-deps chromium
+
+      - name: Build web app
+        run: pnpm --filter @blacksmith-demo/web build
+
+      - name: Run e2e tests
+        run: pnpm --filter @blacksmith-demo/e2e test
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **e2e** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
+
+  docker:
+    name: docker (multi-platform image)
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start timer
+        run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
+
+      # Blacksmith's builder keeps the Docker layer cache on NVMe between runs.
+      - name: Set up Docker builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: blacksmith-demo-api
+
+      - name: Build image
+        uses: useblacksmith/build-push-action@v2
+        with:
+          context: .
+          file: api/Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: blacksmith-demo-api:ci
+
+      - name: Report duration
+        if: always()
+        run: echo "⏱ **docker** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
 ```
