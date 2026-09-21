@@ -1,4 +1,4 @@
-# Blacksmith-Demo CI — the "before" state, on GitHub-hosted runners with stock actions.
+# Blacksmith-Demo CI: the "before" state, on GitHub-hosted runners with stock actions.
 # This is the workflow you will migrate to Blacksmith during the workshop.
 # Follow MIGRATION.md.
 name: CI
