@@ -115,7 +115,13 @@ edits, all included in [Appendix C](#appendix-c-the-finished-workflow):
 2. `cache: pnpm` on both `actions/setup-node` steps (lockfile-keyed).
 3. An `actions/cache` step for the cargo registry (`~/.cargo/registry` + `~/.cargo/git`).
 4. Playwright: install **Chromium only** instead of every browser, with the
-   browser directory cached via `actions/cache`.
+   browser directory on a **sticky disk**, so warm runs skip the download entirely.
+
+With that, the finished workflow shows this repo's top three sticky-disk spots:
+the cargo `target/` directory (your Step 2), Docker layers (the builder swap),
+and the Playwright browser directory. Small, compressible state (pnpm store,
+cargo registry) stays on the Actions cache: disks for big state, cache for the
+rest.
 
 ## Step 4: Right-size your longest workflow
 
@@ -183,7 +189,9 @@ The complete `ci.yml` after Steps 1 to 3. Paste it over yours at any point to
 catch up (use a new branch and open a PR so CI runs on it):
 
 ```yaml
-# Blacksmith-Demo CI: the finished state after Steps 1 to 3.
+# Blacksmith-Demo CI: the finished state after Steps 1 to 3. Three sticky
+# disks (cargo target, Docker layers, Playwright browsers) plus the Actions
+# cache for small state.
 # Paste this whole file over .github/workflows/ci.yml (on a new branch,
 # then open a PR) to catch up at any point. Step 4 happens in the dashboard.
 name: CI
@@ -309,11 +317,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
+      - name: Mount sticky disk for Playwright browsers
+        uses: useblacksmith/stickydisk@v1
         with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ github.repository }}-playwright
+          path: /home/runner/.cache/ms-playwright
 
       - name: Install Chromium
         run: pnpm --filter @blacksmith-demo/e2e exec playwright install --with-deps chromium
