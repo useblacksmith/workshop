@@ -2,7 +2,7 @@
 
 A small conference schedule & voting app with deliberately typical CI. It's
 the fallback repo for the hands-on Blacksmith workshop: if you can't migrate
-your own repo, you migrate this one: same four steps, guaranteed to work.
+your own repo, you migrate this one: same three steps, guaranteed to work.
 
 **👉 Doing the workshop? Everything is in [MIGRATION.md](MIGRATION.md).**
 
@@ -22,12 +22,13 @@ ways real workflows are (no dependency caches, browsers re-downloaded every run,
 cargo compiling from scratch); that's not sabotage, it's realism, and
 fixing it is the workshop.
 
-## The four steps
+## The three steps
 
 1. Swap runner labels to Blacksmith
 2. Cargo build on a sticky disk + persistent Docker layer cache
-3. The PR `@codesmith` opens: caches, Chromium-only, concurrency
-4. Right-sizing happens in the Blacksmith dashboard
+3. The PR `@codesmith` opens: the full caching stack (sticky disks, checkout, Docker layers)
+
+Later, with a week of run history: ask Codesmith to `/rightsize` your longest workflow.
 
 Fell behind? Appendix C of [MIGRATION.md](MIGRATION.md) has the finished
 workflow to paste in.

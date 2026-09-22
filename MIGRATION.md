@@ -1,8 +1,8 @@
 # The CI Speedrun: workshop guide
 
-Four steps, all in your browser, no local setup: migrate CI to
+Three steps, all in your browser, no local setup: migrate CI to
 [Blacksmith](https://blacksmith.sh), put the expensive parts on persistent
-disks, then let an agent finish the tuning and right-size your runners.
+disks, then let an agent finish the caching stack.
 
 You'll do this either on **your own repo** (best: you leave with real CI
 migrated) or on **our demo repo** (guaranteed to work for everyone).
@@ -100,9 +100,13 @@ minutes.
 Then comment on any PR or issue in your repo:
 
 ```
-@codesmith find the expensive, uncached parts of this workflow and
-open a PR configuring sticky disks and caching for them.
+@codesmith configure caching for this workflow: sticky disks for the
+expensive paths, swap checkout to useblacksmith/checkout, and enable
+Docker layer caching with the Blacksmith build actions.
 ```
+
+Ask for all three. A prompt that only says "add sticky disks" gets you
+sticky disks and nothing else.
 
 Codesmith reads your run history (step timings, cache misses, oversized
 installs) and opens a PR. Review the diff, compare it with what you mounted
@@ -126,15 +130,6 @@ and the Playwright browser directory. Small, compressible state (pnpm store,
 cargo registry) stays on the Actions cache: disks for big state, cache for the
 rest.
 
-## Step 4: Right-size your longest workflow
-
-You now have at least two Blacksmith runs of history, enough for
-right-sizing. In the Blacksmith dashboard, run **rightsize** against your
-longest-running workflow: it analyzes per-step CPU and memory headroom and
-recommends a runner size per job (bigger where you're compute-bound, smaller
-where you're paying for idle cores). Review the recommendation card, ask it
-to open the PR for the rows you agree with, merge, and run one last time.
-
 ## The scoreboard
 
 Compare **per-job durations** (never wall clock) between your first GitHub
@@ -145,6 +140,10 @@ leaderboard (QR on screen). Biggest speedup wins.
 
 ## Keep going
 
+- After a week of real runs, ask Codesmith to `/rightsize` your longest
+  workflow: it reads per-step CPU and memory headroom and recommends a runner
+  size per job. (The report needs run history, which is why it's homework and
+  not a workshop step.)
 - Migrated the demo repo today? Do your real repo this week; you already
   have the account, the app, and 3,000 free minutes/month, and Step 1 took
   you ten minutes.
@@ -196,7 +195,7 @@ catch up (use a new branch and open a PR so CI runs on it):
 # disks (cargo target, Docker layers, Playwright browsers) plus the Actions
 # cache for small state.
 # Paste this whole file over .github/workflows/ci.yml (on a new branch,
-# then open a PR) to catch up at any point. Step 4 happens in the dashboard.
+# then open a PR) to catch up at any point.
 name: CI
 
 on:
