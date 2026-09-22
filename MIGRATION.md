@@ -114,8 +114,8 @@ edits, all included in [Appendix C](#appendix-c-the-finished-workflow):
 1. A `concurrency` block so superseded runs cancel themselves.
 2. `cache: pnpm` on both `actions/setup-node` steps (lockfile-keyed).
 3. An `actions/cache` step for the cargo registry (`~/.cargo/registry` + `~/.cargo/git`).
-4. Playwright: install **Chromium only** instead of every browser, with the
-   browser directory on a **sticky disk**, so warm runs skip the download entirely.
+4. Playwright: the browser directory goes on a **sticky disk**, so warm runs
+   skip the download entirely.
 
 With that, the finished workflow shows this repo's top three sticky-disk spots:
 the cargo `target/` directory (your Step 2), Docker layers (the builder swap),
@@ -303,6 +303,7 @@ jobs:
   e2e:
     name: e2e (Playwright)
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v7
       - name: Start timer

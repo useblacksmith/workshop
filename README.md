@@ -18,7 +18,7 @@ your own repo, you migrate this one: same four steps, guaranteed to work.
 
 One workflow, five parallel jobs: a miniature of a real team's CI, on
 GitHub-hosted runners with stock actions. It's unoptimized in exactly the
-ways real workflows are (no dependency caches, every browser installed,
+ways real workflows are (no dependency caches, browsers re-downloaded every run,
 cargo compiling from scratch); that's not sabotage, it's realism, and
 fixing it is the workshop.
 

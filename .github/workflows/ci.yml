@@ -91,6 +91,7 @@ jobs:
   e2e:
     name: e2e (Playwright)
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v7
       - name: Start timer
@@ -104,8 +105,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install browsers
-        run: pnpm --filter @blacksmith-demo/e2e exec playwright install --with-deps
+      - name: Install Chromium
+        run: pnpm --filter @blacksmith-demo/e2e exec playwright install --with-deps chromium
 
       - name: Build web app
         run: pnpm --filter @blacksmith-demo/web build
