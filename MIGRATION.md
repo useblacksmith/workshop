@@ -59,8 +59,15 @@ same code, ~4x faster transfers.
 ## Step 2: Sticky disks
 
 A **sticky disk** is a persistent NVMe volume that mounts into your runner in
-seconds, with everything exactly as the last run left it. Give one to your
-most expensive directory:
+seconds, with everything exactly as the last run left it. This step is the
+agent's first job. Comment on your open PR:
+
+```
+@codesmith mount sticky disks for the expensive paths in this workflow.
+```
+
+Disks only for now; the rest of the caching stack is Step 3. Here is what it
+will add for the demo repo's `rust` job (one step per disk, a key and a path):
 
 ```yaml
       - name: Mount sticky disk
@@ -81,8 +88,8 @@ most expensive directory:
 | Cypress / Playwright browsers | `~/.cache/Cypress` / `~/.cache/ms-playwright` |
 | Docker layers | don't mount; swap to `useblacksmith/setup-docker-builder@v2` (with a `cache-key`) + `useblacksmith/build-push-action@v2`; the layer cache persists automatically |
 
-**Demo repo:** mount `./stats/target` in the `rust` job, and make the Docker
-builder swap shown above in the `docker` job.
+Prefer to write it yourself? It is one step per disk, per the recipe sheet
+above.
 
 Two expectations to set: the disk pays off on the **second** run, and on orgs
 with **sticky-disk branch protection** enabled, disks commit only from the
@@ -101,20 +108,21 @@ minutes.
 Then comment on any PR or issue in your repo:
 
 ```
-@codesmith configure caching for this workflow: sticky disks for the
-expensive paths, swap checkout to useblacksmith/checkout, and enable
-Docker layer caching with the Blacksmith build actions.
+@codesmith find any remaining CI optimizations in this workflow: swap
+checkout to useblacksmith/checkout, enable Docker layer caching with the
+Blacksmith build actions, and add any caches I am missing.
 ```
 
-Ask for all three. A prompt that only says "add sticky disks" gets you
-sticky disks and nothing else.
+Comment on the **same PR** as Step 2, so everything stacks into one
+reviewable PR you merge once at the end. Name what you want: the agent does
+exactly what you ask and nothing more.
 
 Codesmith reads your run history (step timings, cache misses, oversized
 installs) and opens a PR. Review the diff, compare it with what you mounted
 by hand in Step 2, and merge.
 
-Rather not spend credits, or want to check the agent's work? Its PR makes four
-edits, all included in [Appendix C](#appendix-c-the-finished-workflow):
+Rather not spend credits, or want to check the agent's work? Across Steps 2
+and 3 its commits add, all included in [Appendix C](#appendix-c-the-finished-workflow):
 
 1. A `concurrency` block so superseded runs cancel themselves.
 2. `cache: pnpm` on both `actions/setup-node` steps (lockfile-keyed).
