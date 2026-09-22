@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 // template copies never set it, so this is always green for attendees.
 describe("schedule latency", () => {
   it("resolves the schedule within budget", () => {
-    if (process.env.DEMO_FLAKY === "1" && Math.random() < 0.15) {
+    if (import.meta.env.VITE_DEMO_FLAKY === "1" && Math.random() < 0.15) {
       expect.fail("schedule fetch exceeded latency budget");
     }
     expect(true).toBe(true);
