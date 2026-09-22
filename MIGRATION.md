@@ -12,8 +12,9 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
 ## Step 0: Setup (~10 min, do this first)
 
 1. Get on the wifi, sign in at [github.com](https://github.com).
-2. Sign in at [app.blacksmith.sh](https://app.blacksmith.sh) with GitHub.
-   Don't install anything yet.
+2. Sign in at [app.blacksmith.sh/?ref=wearedevelopers-2026](https://app.blacksmith.sh/?ref=wearedevelopers-2026)
+   with GitHub. Use this exact link (or the QR on screen); the `ref` unlocks
+   workshop access with no card required. Don't install anything yet.
 3. **Choose your repo:**
 
 **Option A: your own repo** (pick this if you can):
