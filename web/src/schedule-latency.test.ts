@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { describe, expect, it } from "vitest";
 
 // Dashboard-demo test: exercises the per-test history view. It can only fail
