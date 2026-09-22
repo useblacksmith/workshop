@@ -116,6 +116,9 @@ edits, all included in [Appendix C](#appendix-c-the-finished-workflow):
 3. An `actions/cache` step for the cargo registry (`~/.cargo/registry` + `~/.cargo/git`).
 4. Playwright: the browser directory goes on a **sticky disk**, so warm runs
    skip the download entirely.
+5. Checkout swapped to `useblacksmith/checkout@v1`: a drop-in for
+   `actions/checkout` that clones from a git mirror cached next to the runner,
+   which big repos feel the most.
 
 With that, the finished workflow shows this repo's top three sticky-disk spots:
 the cargo `target/` directory (your Step 2), Docker layers (the builder swap),
@@ -173,7 +176,7 @@ its own hardware:
           - { platform: arm64, runner: blacksmith-2vcpu-ubuntu-2404-arm }
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
       - uses: useblacksmith/setup-docker-builder@v2
         with:
           cache-key: my-image-${{ matrix.platform }}
@@ -211,7 +214,7 @@ jobs:
     name: web (pnpm + Vite + vitest)
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
 
@@ -238,7 +241,7 @@ jobs:
     name: rust (cargo build + test)
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
 
@@ -281,7 +284,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
 
@@ -305,7 +308,7 @@ jobs:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
 
@@ -341,7 +344,7 @@ jobs:
     name: docker (multi-platform image)
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v7
+      - uses: useblacksmith/checkout@v1
       - name: Start timer
         run: echo "JOB_T0=$(date +%s)" >> "$GITHUB_ENV"
 
