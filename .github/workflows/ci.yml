@@ -28,8 +28,6 @@ jobs:
 
       - name: Unit tests
         run: pnpm --filter @blacksmith-demo/web test
-        env:
-          VITE_DEMO_FLAKY: ${{ vars.DEMO_FLAKY }}
 
       - name: Build
         run: pnpm --filter @blacksmith-demo/web build
