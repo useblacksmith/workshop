@@ -34,7 +34,7 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
 
 **Both options:** run the workflow once now on GitHub's runners
 (**Actions → CI → Run workflow**) and note the **per-job durations**: job
-times, not the run's wall clock, are your before-numbers for the scoreboard.
+times, not the run's wall clock, are your before-numbers.
 
 ## Step 1: Migrate the runners
 
@@ -140,11 +140,10 @@ and the Playwright browser directory. Small, compressible state (pnpm store,
 cargo registry) stays on the Actions cache: disks for big state, cache for the
 rest.
 
-## The scoreboard
+## Compare your results
 
 Compare **per-job durations** (never wall clock) between your first GitHub
-run and your final run. Post your biggest percentage speedup to the
-leaderboard (QR on screen). Biggest speedup wins.
+run and your final run.
 
 ---
 
