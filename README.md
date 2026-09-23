@@ -6,6 +6,53 @@ your own repo, you migrate this one: same three steps, guaranteed to work.
 
 **👉 Doing the workshop? Everything is in [MIGRATION.md](MIGRATION.md).**
 
+## Copy-paste kit
+
+Everything you'd otherwise type by hand during the workshop, in one place.
+Copy from here instead of transcribing from the screen.
+
+**Links**
+
+| What | Link |
+|---|---|
+| Sign in to Blacksmith (use this exact link; the `ref` unlocks workshop access, no card) | <https://app.blacksmith.sh/?ref=wearedevelopers-2026> |
+| Create a new GitHub org (pick the Free plan) | <https://github.com/account/organizations/new> |
+| This repo (hit "Use this template") | <https://github.com/useblacksmith/workshop> |
+| Workshop credits form (submit the name of the org you installed on today) | <https://docs.google.com/forms/d/e/1FAIpQLSfRiNuUHJZJgt55Wutb-MvfVK53N56yWbOP4cVdP8mcV9nT0Q/viewform> |
+| Sticky disks guide | <https://docs.blacksmith.sh/blacksmith-caching/dependencies-sticky-disks> |
+| Docs home | <https://docs.blacksmith.sh> |
+
+**Names and labels**
+
+```text
+<your github username>-blacksmith-workshop     # throwaway org name
+blacksmith-2vcpu-ubuntu-2404                   # default runner label
+blacksmith-4vcpu-ubuntu-2404                   # bigger label for the rust job
+```
+
+**Codesmith prompts** (comment on your open migration PR, or paste into a
+Codesmith chat in the dashboard)
+
+Step 2, sticky disks only:
+
+```text
+@codesmith mount sticky disks for the expensive paths in this workflow.
+```
+
+Step 3, the rest of the caching stack (same PR as Step 2):
+
+```text
+@codesmith find any remaining CI optimizations in this workflow: swap
+checkout to useblacksmith/checkout, enable Docker layer caching with the
+Blacksmith build actions, and add any caches I am missing.
+```
+
+**Baseline run** (if your workflow has no Run workflow button):
+
+```bash
+git commit --allow-empty -m "baseline" && git push
+```
+
 ## What's inside
 
 | Path | What | CI job |
