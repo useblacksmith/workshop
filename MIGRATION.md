@@ -101,9 +101,10 @@ disks just fine.)
 
 ## Step 3: Let Codesmith configure the rest
 
-First, workshop credits: scan the QR on screen and submit the **name of the
-org you installed on today**. Credits land on your org within a couple of
-minutes.
+First, workshop credits: scan the QR on screen (or open the
+[credits form](https://docs.google.com/forms/d/e/1FAIpQLSfRiNuUHJZJgt55Wutb-MvfVK53N56yWbOP4cVdP8mcV9nT0Q/viewform))
+and submit the **name of the org you installed on today**. Credits land on
+your org within a couple of minutes.
 
 Then comment on any PR or issue in your repo:
 
