@@ -12,17 +12,14 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
 ## Step 0: Setup (~10 min, do this first)
 
 1. Get on the wifi, sign in at [github.com](https://github.com).
-2. Sign in at [app.blacksmith.sh/?ref=wearedevelopers-2026](https://app.blacksmith.sh/?ref=wearedevelopers-2026)
-   with GitHub. Use this exact link (or the QR on screen); the `ref` unlocks
-   workshop access with no card required. Don't install anything yet.
-3. **Get an org you own.** The Blacksmith app installs on organizations, and
+2. **Get an org you own.** The Blacksmith app installs on organizations, and
    installing it needs **owner** rights (or an owner nearby who'll approve
    your install request fast); personal side-project orgs count. No org you
    own? Create a throwaway: github.com → avatar → Settings → Organizations →
    **New organization** → Free plan. Name it
    `<github username>-blacksmith-workshop`. Skip inviting members.
    ([Appendix A](#appendix-a-cleanup) deletes all of this in one minute.)
-4. **Choose your repo:**
+3. **Choose your repo:**
 
 **Option A: your own repo** (pick this if you can):
 - A repo with real CI that you're **allowed to experiment on**, in the org
@@ -33,6 +30,13 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
   Owner: your new org. Visibility: **Public** (free unlimited Actions
   minutes). It's a small real app (Go API + Postgres, Rust service,
   TypeScript frontend, Playwright) with deliberately typical CI.
+
+4. **Sign in to Blacksmith** at
+   [app.blacksmith.sh/?ref=wearedevelopers-2026](https://app.blacksmith.sh/?ref=wearedevelopers-2026)
+   with GitHub. Use this exact link (or the QR on screen); the `ref` unlocks
+   workshop access with no card required. Already had a Blacksmith account
+   and you're logged in? Log out and sign back in through this link, that's
+   what attaches the access. Installing the app is Step 1.
 
 **Both options, run your baseline now:** on the demo repo, templating already
 triggered the first run (see the Actions tab). On your own repo: **Actions →
