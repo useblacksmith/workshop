@@ -75,7 +75,7 @@ fixing it is the workshop.
 
 Later, with a week of run history: ask Codesmith to `/rightsize` your longest workflow.
 
-Fell behind? Appendix C of [MIGRATION.md](MIGRATION.md) has the finished
+Fell behind? Appendix B of [MIGRATION.md](MIGRATION.md) has the finished
 workflow to paste in.
 
 ## Run it locally
