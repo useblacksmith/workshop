@@ -43,13 +43,16 @@ write down the **per-job durations** (not wall clock): your before-numbers.
 
 1. Install the Blacksmith GitHub App from [app.blacksmith.sh](https://app.blacksmith.sh),
    **scoped to just your chosen repo**; the app only sees what you select.
-2. Swap the runner labels:
-   - **Your repo:** use the **migration wizard** in the Blacksmith dashboard;
-     it opens the PR for you. Or hand-edit: every `runs-on: ubuntu-latest`
-     becomes `runs-on: blacksmith-2vcpu-ubuntu-2404` (per-job sizing like
-     `4vcpu` works too).
-   - **Demo repo:** hand-edit `.github/workflows/ci.yml` in the GitHub web
-     editor (press `.`): five `runs-on` lines.
+2. Open the **migration wizard** in the Blacksmith dashboard (the popup you
+   saw after installing, or the top of the left panel) and walk its five
+   steps:
+   1. **Repository:** pick your repo.
+   2. **Runners:** pick a size per job; the **4vcpu default is a good pick**
+      for today.
+   3. **Docker builds:** make sure Docker build caching is **off**.
+   4. **Git checkout:** make sure checkout caching is **off**. (Both are
+      Step 3: the agent adds them, so you can read the diff.)
+   5. **Pull request:** hit **Generate pull request**.
 3. The PR run is your Step 1 number. **Everything today stays on this PR**;
    Steps 2 and 3 stack onto it, and nothing needs to merge.
 
