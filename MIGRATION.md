@@ -133,7 +133,7 @@ state** (pnpm store, cargo registry).
 
 ## Compare your results
 
-Compare **per-job durations** (never wall clock) between your first GitHub
+Compare **per-job durations** between your first GitHub
 run and your final run.
 
 ---
