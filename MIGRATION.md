@@ -322,7 +322,7 @@ jobs:
         run: echo "⏱ **e2e** finished in **$(( $(date +%s) - JOB_T0 ))s**" >> "$GITHUB_STEP_SUMMARY"
 
   docker:
-    name: docker (multi-platform image)
+    name: docker (container image)
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: useblacksmith/checkout@v1
