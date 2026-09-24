@@ -15,22 +15,24 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
 2. Sign in at [app.blacksmith.sh/?ref=wearedevelopers-2026](https://app.blacksmith.sh/?ref=wearedevelopers-2026)
    with GitHub. Use this exact link (or the QR on screen); the `ref` unlocks
    workshop access with no card required. Don't install anything yet.
-3. **Choose your repo:**
+3. **Get an org you own.** The Blacksmith app installs on organizations, and
+   installing it needs **owner** rights (or an owner nearby who'll approve
+   your install request fast); personal side-project orgs count. No org you
+   own? Create a throwaway: github.com → avatar → Settings → Organizations →
+   **New organization** → Free plan. Name it
+   `<github username>-blacksmith-workshop`. Skip inviting members.
+   ([Appendix A](#appendix-a-cleanup) deletes all of this in one minute.)
+4. **Choose your repo:**
 
 **Option A: your own repo** (pick this if you can):
-- You need a GitHub **organization you can install apps on** (org admin, or
-  an admin who'll approve fast); personal side-project orgs count.
-- And a repo in it with real CI that you're **allowed to experiment on**.
+- A repo with real CI that you're **allowed to experiment on**, in the org
+  you own. Nothing has to merge today; everything lands as PRs you control.
 
 **Option B: our demo repo** (pick this otherwise):
-1. Create a throwaway org: github.com → avatar → Settings → Organizations →
-   **New organization** → Free plan. Name it `<github username>-blacksmith-workshop`. Skip
-   inviting members. (Blacksmith installs on orgs, not personal accounts.
-   [Appendix A](#appendix-a-cleanup) deletes all of this in one minute.)
-2. On this repo: **Use this template → Create a new repository.**
-   Owner: your new org. Visibility: **Public** (free unlimited Actions
-   minutes). It's a small real app (Go API + Postgres, Rust service,
-   TypeScript frontend, Playwright) with deliberately typical CI.
+- On this repo: **Use this template → Create a new repository.**
+  Owner: your new org. Visibility: **Public** (free unlimited Actions
+  minutes). It's a small real app (Go API + Postgres, Rust service,
+  TypeScript frontend, Playwright) with deliberately typical CI.
 
 **Both options:** run the workflow once now on GitHub's runners
 (**Actions → CI → Run workflow**) and note the **per-job durations**: job
