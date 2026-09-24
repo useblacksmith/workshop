@@ -63,7 +63,7 @@ write down the **per-job durations** (not wall clock): your before-numbers.
 Bonus, zero config: every existing `actions/cache` / `setup-node` cache is
 now served **colocated** with the runner, ~4x faster transfers.
 
-> Fell behind? [Appendix C](#appendix-c-the-finished-workflow) has the finished workflow; paste it in on a new branch and open a PR.
+> Fell behind? [Appendix B](#appendix-b-the-finished-workflow) has the finished workflow; paste it in on a new branch and open a PR.
 
 ## Step 2: Sticky disks
 
@@ -101,7 +101,7 @@ The disk pays off on the **second** run: the first one only fills it. When
 the run goes green, hit **Re-run all jobs** (top right of the run page) and
 write down the warm time: that's your Step 2 number.
 
-> Fell behind? [Appendix C](#appendix-c-the-finished-workflow) has the finished workflow.
+> Fell behind? [Appendix B](#appendix-b-the-finished-workflow) has the finished workflow.
 
 ## Step 3: Let Codesmith configure the rest
 
@@ -120,7 +120,7 @@ then **Re-run all jobs** once more and write down the warm time: your final
 number. The PR can stay open; merge it later (or never) on your own terms.
 
 Want to check the agent's work, or do it by hand instead? Across Steps 2 and
-3 its commits add, all included in [Appendix C](#appendix-c-the-finished-workflow):
+3 its commits add, all included in [Appendix B](#appendix-b-the-finished-workflow):
 
 1. A `concurrency` block so superseded runs cancel themselves.
 2. `cache: pnpm` on both `actions/setup-node` steps (lockfile-keyed).
@@ -164,32 +164,7 @@ Used a throwaway org and want to leave no trace?
 
 (We'd rather you kept the free minutes, but the exit is always this easy.)
 
-## Appendix B: Multi-arch images without QEMU
-
-If you build `arm64` images on x86 runners today, you're paying the QEMU
-emulation tax. Blacksmith has native arm64 runners; build each platform on
-its own hardware:
-
-```yaml
-  docker:
-    strategy:
-      matrix:
-        include:
-          - { platform: amd64, runner: blacksmith-2vcpu-ubuntu-2404 }
-          - { platform: arm64, runner: blacksmith-2vcpu-ubuntu-2404-arm }
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: useblacksmith/checkout@v1
-      - uses: useblacksmith/setup-docker-builder@v2
-        with:
-          cache-key: my-image-${{ matrix.platform }}
-      - uses: useblacksmith/build-push-action@v2
-        with:
-          platforms: linux/${{ matrix.platform }}
-          ...
-```
-
-## Appendix C: the finished workflow
+## Appendix B: the finished workflow
 
 The complete `ci.yml` after Steps 1 to 3. Paste it over yours at any point to
 catch up (use a new branch and open a PR so CI runs on it):
