@@ -46,8 +46,7 @@ times, not the run's wall clock, are your before-numbers.
      becomes `runs-on: blacksmith-2vcpu-ubuntu-2404` (always the explicit
      label; per-job sizing like `4vcpu` is a feature, not a typo).
    - **Demo repo:** hand-edit `.github/workflows/ci.yml` in the GitHub web
-     editor (press `.`): five `runs-on` lines; give `rust` the
-     `blacksmith-4vcpu-ubuntu-2404` label.
+     editor (press `.`): five `runs-on` lines.
 3. Merge/commit and run the workflow again.
 
 Free bonus you didn't configure: every existing `actions/cache` /
