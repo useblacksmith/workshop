@@ -26,8 +26,7 @@ Copy from here instead of transcribing from the screen.
 
 ```text
 <your github username>-blacksmith-workshop     # throwaway org name
-blacksmith-2vcpu-ubuntu-2404                   # default runner label
-blacksmith-4vcpu-ubuntu-2404                   # bigger label for the rust job
+blacksmith-4vcpu-ubuntu-2404                   # default runner label
 ```
 
 **Codesmith prompts** (comment on your open migration PR, or paste into a
