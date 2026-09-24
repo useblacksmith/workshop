@@ -35,8 +35,9 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
    [app.blacksmith.sh/?ref=wearedevelopers-2026](https://app.blacksmith.sh/?ref=wearedevelopers-2026)
    with GitHub. Use this exact link (or the QR on screen); the `ref` unlocks
    workshop access with no card required. Already had a Blacksmith account
-   and you're logged in? Log out and sign back in through this link, that's
-   what attaches the access. Installing the app is Step 1.
+   and you're logged in? Log out, then **open this link again** and sign in
+   from the page it lands on: the `ref` must be in the address bar when you
+   click sign-in, and logging out drops it. Installing the app is Step 1.
 
 **Both options, run your baseline now:** on the demo repo, templating already
 triggered the first run (see the Actions tab). On your own repo: **Actions →
