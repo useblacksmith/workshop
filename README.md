@@ -18,7 +18,6 @@ Copy from here instead of transcribing from the screen.
 | Sign in to Blacksmith (use this exact link; the `ref` unlocks workshop access, no card) | <https://app.blacksmith.sh/?ref=wearedevelopers-2026> |
 | Create a new GitHub org (pick the Free plan) | <https://github.com/account/organizations/new> |
 | This repo (hit "Use this template") | <https://github.com/useblacksmith/workshop> |
-| Workshop credits form (submit the name of the org you installed on today) | <https://docs.google.com/forms/d/e/1FAIpQLSfRiNuUHJZJgt55Wutb-MvfVK53N56yWbOP4cVdP8mcV9nT0Q/viewform> |
 | Sticky disks guide | <https://docs.blacksmith.sh/blacksmith-caching/dependencies-sticky-disks> |
 | Docs home | <https://docs.blacksmith.sh> |
 

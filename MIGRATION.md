@@ -34,9 +34,10 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
   minutes). It's a small real app (Go API + Postgres, Rust service,
   TypeScript frontend, Playwright) with deliberately typical CI.
 
-**Both options:** run the workflow once now on GitHub's runners
-(**Actions → CI → Run workflow**) and note the **per-job durations**: job
-times, not the run's wall clock, are your before-numbers.
+**Both options, run your baseline now:** on the demo repo, templating already
+triggered the first run (see the Actions tab). On your own repo: **Actions →
+CI → Run workflow**, or push an empty commit / open a PR. When it finishes,
+write down the **per-job durations** (not wall clock): your before-numbers.
 
 ## Step 1: Migrate the runners
 
@@ -45,23 +46,23 @@ times, not the run's wall clock, are your before-numbers.
 2. Swap the runner labels:
    - **Your repo:** use the **migration wizard** in the Blacksmith dashboard;
      it opens the PR for you. Or hand-edit: every `runs-on: ubuntu-latest`
-     becomes `runs-on: blacksmith-2vcpu-ubuntu-2404` (always the explicit
-     label; per-job sizing like `4vcpu` is a feature, not a typo).
+     becomes `runs-on: blacksmith-2vcpu-ubuntu-2404` (per-job sizing like
+     `4vcpu` works too).
    - **Demo repo:** hand-edit `.github/workflows/ci.yml` in the GitHub web
      editor (press `.`): five `runs-on` lines.
-3. Merge/commit and run the workflow again.
+3. The PR run is your Step 1 number. **Don't merge yet**; Steps 2 and 3
+   stack onto this same PR.
 
-Free bonus you didn't configure: every existing `actions/cache` /
-`setup-node` cache is now served from a cache **colocated** with the runner:
-same code, ~4x faster transfers.
+Bonus, zero config: every existing `actions/cache` / `setup-node` cache is
+now served **colocated** with the runner, ~4x faster transfers.
 
 > Fell behind? [Appendix C](#appendix-c-the-finished-workflow) has the finished workflow; paste it in on a new branch and open a PR.
 
 ## Step 2: Sticky disks
 
 A **sticky disk** is a persistent NVMe volume that mounts into your runner in
-seconds, with everything exactly as the last run left it. This step is the
-agent's first job. Comment on your open PR:
+seconds, exactly as the last run left it. Ask the agent to add them: comment
+on your open PR:
 
 ```
 @codesmith mount sticky disks for the expensive paths in this workflow.
@@ -89,25 +90,17 @@ will add for the demo repo's `rust` job (one step per disk, a key and a path):
 | Cypress / Playwright browsers | `~/.cache/Cypress` / `~/.cache/ms-playwright` |
 | Docker layers | don't mount; swap to `useblacksmith/setup-docker-builder@v2` (with a `cache-key`) + `useblacksmith/build-push-action@v2`; the layer cache persists automatically |
 
-Prefer to write it yourself? It is one step per disk, per the recipe sheet
-above.
-
-Two expectations to set: the disk pays off on the **second** run, and on orgs
-with **sticky-disk branch protection** enabled, disks commit only from the
-default branch; PR runs read but don't warm, so merge before you measure.
-(Branch protection is off by default, so on a fresh org your PR runs fill
-disks just fine.)
+The disk pays off on the **second** run: the first one only fills it. When
+the run goes green, hit **Re-run all jobs** (top right of the run page) and
+write down the warm time: that's your Step 2 number. (Sticky-disk branch
+protection is off by default; leave it off and PR runs fill disks fine.)
 
 > Fell behind? [Appendix C](#appendix-c-the-finished-workflow) has the finished workflow.
 
 ## Step 3: Let Codesmith configure the rest
 
-First, workshop credits: scan the QR on screen (or open the
-[credits form](https://docs.google.com/forms/d/e/1FAIpQLSfRiNuUHJZJgt55Wutb-MvfVK53N56yWbOP4cVdP8mcV9nT0Q/viewform))
-and submit the **name of the org you installed on today**. Credits land on
-your org within a couple of minutes.
-
-Then comment on any PR or issue in your repo:
+Comment on the **same PR** as Step 2, so everything stacks into one
+reviewable PR you merge once at the end:
 
 ```
 @codesmith find any remaining CI optimizations in this workflow: swap
@@ -115,16 +108,13 @@ checkout to useblacksmith/checkout, enable Docker layer caching with the
 Blacksmith build actions, and add any caches I am missing.
 ```
 
-Comment on the **same PR** as Step 2, so everything stacks into one
-reviewable PR you merge once at the end. Name what you want: the agent does
-exactly what you ask and nothing more.
+Name what you want: the agent does exactly what you ask and nothing more. It
+pushes commits to the PR; that run fills the new caches, so let it finish,
+then **Re-run all jobs** once more and write down the warm time: your final
+number. Then merge.
 
-Codesmith reads your run history (step timings, cache misses, oversized
-installs) and opens a PR. Review the diff, compare it with what you mounted
-by hand in Step 2, and merge.
-
-Rather not spend credits, or want to check the agent's work? Across Steps 2
-and 3 its commits add, all included in [Appendix C](#appendix-c-the-finished-workflow):
+Want to check the agent's work, or do it by hand instead? Across Steps 2 and
+3 its commits add, all included in [Appendix C](#appendix-c-the-finished-workflow):
 
 1. A `concurrency` block so superseded runs cancel themselves.
 2. `cache: pnpm` on both `actions/setup-node` steps (lockfile-keyed).
@@ -135,11 +125,9 @@ and 3 its commits add, all included in [Appendix C](#appendix-c-the-finished-wor
    `actions/checkout` that clones from a git mirror cached next to the runner,
    which big repos feel the most.
 
-With that, the finished workflow shows this repo's top three sticky-disk spots:
-the cargo `target/` directory (your Step 2), Docker layers (the builder swap),
-and the Playwright browser directory. Small, compressible state (pnpm store,
-cargo registry) stays on the Actions cache: disks for big state, cache for the
-rest.
+Rule of thumb in the finished workflow: **disks for big state** (cargo
+`target/`, Docker layers, Playwright browsers), **Actions cache for small
+state** (pnpm store, cargo registry).
 
 ## Compare your results
 
