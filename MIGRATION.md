@@ -50,8 +50,8 @@ write down the **per-job durations** (not wall clock): your before-numbers.
      `4vcpu` works too).
    - **Demo repo:** hand-edit `.github/workflows/ci.yml` in the GitHub web
      editor (press `.`): five `runs-on` lines.
-3. The PR run is your Step 1 number. **Don't merge yet**; Steps 2 and 3
-   stack onto this same PR.
+3. The PR run is your Step 1 number. **Everything today stays on this PR**;
+   Steps 2 and 3 stack onto it, and nothing needs to merge.
 
 Bonus, zero config: every existing `actions/cache` / `setup-node` cache is
 now served **colocated** with the runner, ~4x faster transfers.
@@ -92,15 +92,14 @@ will add for the demo repo's `rust` job (one step per disk, a key and a path):
 
 The disk pays off on the **second** run: the first one only fills it. When
 the run goes green, hit **Re-run all jobs** (top right of the run page) and
-write down the warm time: that's your Step 2 number. (Sticky-disk branch
-protection is off by default; leave it off and PR runs fill disks fine.)
+write down the warm time: that's your Step 2 number.
 
 > Fell behind? [Appendix C](#appendix-c-the-finished-workflow) has the finished workflow.
 
 ## Step 3: Let Codesmith configure the rest
 
 Comment on the **same PR** as Step 2, so everything stacks into one
-reviewable PR you merge once at the end:
+reviewable PR:
 
 ```
 @codesmith find any remaining CI optimizations in this workflow: swap
@@ -111,7 +110,7 @@ Blacksmith build actions, and add any caches I am missing.
 Name what you want: the agent does exactly what you ask and nothing more. It
 pushes commits to the PR; that run fills the new caches, so let it finish,
 then **Re-run all jobs** once more and write down the warm time: your final
-number. Then merge.
+number. The PR can stay open; merge it later (or never) on your own terms.
 
 Want to check the agent's work, or do it by hand instead? Across Steps 2 and
 3 its commits add, all included in [Appendix C](#appendix-c-the-finished-workflow):
