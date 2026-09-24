@@ -16,6 +16,7 @@ Copy from here instead of transcribing from the screen.
 | What | Link |
 |---|---|
 | Sign in to Blacksmith (use this exact link; the `ref` unlocks workshop access, no card) | <https://app.blacksmith.sh/?ref=wearedevelopers-2026> |
+| Already had a Blacksmith account? Sign in with this link instead (works while logged in) | <https://dashboardbackend.blacksmith.sh/login/github?redirect=https%3A%2F%2Fapp.blacksmith.sh%2F%3Fref%3Dwearedevelopers-2026> |
 | Create a new GitHub org (pick the Free plan) | <https://github.com/account/organizations/new> |
 | This repo (hit "Use this template") | <https://github.com/useblacksmith/workshop> |
 | Sticky disks guide | <https://docs.blacksmith.sh/blacksmith-caching/dependencies-sticky-disks> |
