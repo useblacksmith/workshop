@@ -40,10 +40,12 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
    instead: it re-runs sign-in and attaches the workshop access even while
    you're logged in. Installing the app is Step 1.
 
-**Both options, run your baseline now:** on the demo repo, templating already
-triggered the first run (see the Actions tab). On your own repo: **Actions →
-CI → Run workflow**, or push an empty commit / open a PR. When it finishes,
-write down the **per-job durations** (not wall clock): your before-numbers.
+**Both options, run your baseline now:** if the repo just landed in your org
+(templated or brought over), creating it already triggered the first run: see
+the Actions tab and click the newest run. On a repo that already lived there:
+**Actions → CI → Run workflow**, or push an empty commit / open a PR. When it
+finishes, write down the **per-job durations** (not wall clock): your
+before-numbers.
 
 ## Step 1: Migrate the runners
 
