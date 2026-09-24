@@ -42,7 +42,8 @@ migrated) or on **our demo repo** (guaranteed to work for everyone).
 
 **Both options, run your baseline now:** if the repo just landed in your org
 (templated or brought over), creating it already triggered the first run: see
-the Actions tab and click the newest run. On a repo that already lived there:
+the Actions tab and click the newest run (tab empty? your workflow has no
+`push` trigger; use the next path). On a repo that already lived there:
 **Actions → CI → Run workflow**, or push an empty commit / open a PR. When it
 finishes, write down the **per-job durations** (not wall clock): your
 before-numbers.
